@@ -235,13 +235,20 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
 }
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location {
-//    NSLog(@"Download finisehd!");
 
     NSError *error;
     NSURL *destinationLocation;
 
     NSString *fileIdentifier = downloadTask.originalRequest.URL.absoluteString;
     TWRDownloadObject *download = [self.downloads objectForKey:fileIdentifier];
+    
+    if (!download) {
+        // download finished after app relaunch
+        // at this point, we don't have a reference tot the download object
+        // which causes a crash further down.
+        // Best option for now is to just bail out here.
+        return;
+    }
 
  	BOOL success = YES;
 
